@@ -1,9 +1,9 @@
-import random
+import random #keep for future use (generating teams without balance considerations)
 import json
 import os
 
 # File for storing players and ratings
-PLAYERS_FILE = "stored_players.json"
+PLAYERS_FILE = "players.json"
 
 def load_players():
     try:
