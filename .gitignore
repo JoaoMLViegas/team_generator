@@ -1,0 +1,6 @@
+_venv_team_generator/
+__pycache__/
+*.pyc
+*.pyo
+*.json
+*.txt
