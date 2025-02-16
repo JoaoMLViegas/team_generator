@@ -22,7 +22,7 @@ def main_menu():
         elif choice == "2":
             manage_players_menu(stored_players)
         elif choice == "3":
-            manage_teams_menu(stored_players)
+            manage_teams_menu()
         elif choice == "0":
             print("Exiting program.")
             break
