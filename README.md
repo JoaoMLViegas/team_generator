@@ -9,6 +9,7 @@ A terminal-based Python program for generating balanced teams from stored or inp
 - Ratings for Balance: Includes a rating system (1-10) for players to ensure balanced team creation.
 - Menu Interface: Intuitive menu for navigating program options.
 - (in development...) Add option to generate teams without balance considerations
+- (in development...) Allow only a selection of stored players to be used while generating from stored players (now all stored players are used)
 
 ## **Getting Started**
 ### Prerequisites
@@ -31,25 +32,49 @@ python team_generator.py
 ## **Usage**
 Upon running, the program will display the main menu, providing the following options:  
 
---- Team Generator Menu ---  
-1 - Generate teams from stored players  
-2 - Generate teams from input players  
-3 - Add to stored players  
-4 - Remove from stored players  
-5 - List stored players  
-6 - View stored teams  
-7 - Remove stored team  
+--- Team Generator Main Menu ---  
+1 - Generate Teams Menu  
+2 - Manage Players Menu  
+3 - Manage Teams Menu  
 0 - Exit program  
 
-### **Menu Options**
-0. Exit program: Closes the program.
+### **Generate Teams Menu**
+Choosing option 1 in the Main Menu will display the following:
+
+--- Generate Teams Menu ---  
+1 - Generate teams from stored players  
+2 - Generate teams from input players  
+0 - Back to Main Menu  
+
+#### Option description
 1. Generate teams from stored players: Uses the existing list of stored players to form balanced teams based on player ratings.
 2. Generate teams from input players: Lets you enter new players and their ratings to create teams without saving them to storage.
-3. Add to stored players: Add new players with ratings (1-10) to the stored player list, ensuring no duplicate entries.
-4. Remove from stored players: Remove specific players from storage.
-5. List stored players: Displays the list of stored players and their ratings.
-6. View stored teams: Lists available team files and allows you to view the contents of a selected file.
-7. Remove stored team: Lists and deletes unwanted team files from storage.
+
+### **Manage Players Menu**
+Choosing option 2 in the Main Menu will display the following:
+
+--- Manage Players Menu ---  
+1 - Add to stored players  
+2 - Remove from stored players  
+3 - List stored players  
+0 - Back to Main Menu  
+
+#### Option description
+1. Add to stored players: Add new players with ratings (1-10) to the stored player list, ensuring no duplicate entries.
+2. Remove from stored players: Remove specific players from storage.
+3. List stored players: Displays the list of stored players and their ratings.
+
+### **Manage Teams Menu**
+Choosing option 3 in the Main Menu will display the following:
+
+--- Manage Teams Menu ---  
+1 - View stored teams  
+2 - Remove stored team  
+0 - Back to Main Menu  
+
+#### Option description
+1. View stored teams: Lists available team files and allows you to view the contents of a selected file.
+2. Remove stored team: Lists and deletes unwanted team files from storage.
 
 ## **Project Structure**
 team_generator/  
