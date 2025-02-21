@@ -65,24 +65,18 @@ def generate_from_stored(stored_players):
     if not stored_players:
         print("No stored players available. Please add players first.")
         return
-    while True:
-        try:
-            n_teams = int(input("How many teams do you want? "))
-            if n_teams > len(stored_players):
-                print("Number of teams cannot exceed number of players.")
-            else:
-                teams = team_generator(n_teams, stored_players.copy())
-                pretty_print(teams)
-                export_choice = validate_yes_no("Do you want to export teams to a file? (y/n): ")
-                if export_choice == 'y':
-                    export_teams(teams)
-                break
-        except ValueError:
-            print("Please enter a valid number.")
+    
+    balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
+    team_generator_aux(stored_players, balanced)
 
 def generate_from_input():
     players = set()
-    print("Enter player names and ratings (type '0' as name to finish):")
+    balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
+    if balanced:
+        print("Enter player names and ratings (type '0' as name to finish).")
+    else:
+        print("Enter player names (type '0' as name to finish).")
+
     while True:
         player_name = input("Player name: ")
         if player_name == "0":
@@ -90,37 +84,27 @@ def generate_from_input():
         if any(p["name"] == player_name for p in players):
             print(f"{player_name} is already in the list.")
             continue
-
-        while True:
-            try:
-                rating = int(input(f"Enter a rating for {player_name} (1-10): "))
-                if 1 <= rating <= 10:
-                    players.add({"name": player_name, "rating": rating})
-                    break
-                else:
-                    print("Rating must be between 1 and 10.")
-            except ValueError:
-                print("Please enter a valid number for the rating.")
+        
+        if balanced:
+            while True:
+                try:
+                    rating = int(input(f"Enter a rating for {player_name} (1-10): "))
+                    if 1 <= rating <= 10:
+                        players.add({"name": player_name, "rating": rating})
+                        break
+                    else:
+                        print("Rating must be between 1 and 10.")
+                except ValueError:
+                    print("Please enter a valid number for the rating.")
+        else:
+            players.add({"name": player_name})
 
     if not players:
         print("No players entered.")
         return
 
     players = list(players)  # Convert set back to list for team generation
-    while True:
-        try:
-            n_teams = int(input("How many teams do you want? "))
-            if n_teams > len(players):
-                print("Number of teams cannot exceed number of players.")
-            else:
-                teams = team_generator(n_teams, players)
-                pretty_print(teams)
-                export_choice = validate_yes_no("Do you want to export teams to a file? (y/n): ")
-                if export_choice == 'y':
-                    export_teams(teams)
-                break
-        except ValueError:
-            print("Please enter a valid number.")
+    team_generator_aux(players, balanced)
 
 
 # Manage Players
@@ -258,29 +242,51 @@ def remove_stored_team():
 
 # Team Generation
 
-def team_generator(n_teams, players):
-    # Group players by rating
-    rating_groups = {}
-    for player in players:
-        rating_groups.setdefault(player["rating"], []).append(player)
+def team_generator(n_teams, players, balanced):
 
-    # Shuffle players within each rating group
-    for group in rating_groups.values():
-        random.shuffle(group)
+    if balanced: # Generate balanced teams by the players' ratings
 
-    # Bring back together all players in descending order of rating groups
-    sorted_players = [player for rating in sorted(rating_groups.keys(), reverse=True) for player in rating_groups[rating]]
+        # Group players by rating
+        rating_groups = {}
+        for player in players:
+            rating_groups.setdefault(player["rating"], []).append(player)
 
-    # Distribute players across teams
-    teams = [[] for _ in range(n_teams)]
-    team_ratings = [0] * n_teams
+        # Shuffle players within each rating group
+        for group in rating_groups.values():
+            random.shuffle(group)
 
-    for player in sorted_players:
-        min_team_index = team_ratings.index(min(team_ratings))
-        teams[min_team_index].append(player)
-        team_ratings[min_team_index] += player["rating"]
+        # Bring back together all players in descending order of rating groups
+        sorted_players = [player for rating in sorted(rating_groups.keys(), reverse=True) for player in rating_groups[rating]]
+
+        # Distribute players across teams
+        teams = [[] for _ in range(n_teams)]
+        team_ratings = [0] * n_teams
+
+        for player in sorted_players:
+            min_team_index = team_ratings.index(min(team_ratings))
+            teams[min_team_index].append(player)
+            team_ratings[min_team_index] += player["rating"]
+
+    else: # Generate teams randomly
+        random.shuffle(players)
+        teams = [players[i::n_teams] for i in range(n_teams)]
 
     return teams
+
+def team_generator_aux(players, balanced):
+    while True:
+        try:
+            n_teams = int(input("How many teams do you want? "))
+            if n_teams > len(players):
+                print("Number of teams cannot exceed number of players.")
+            else:
+                teams = team_generator(n_teams, players, balanced)
+                pretty_print(teams)
+                if validate_yes_no("Do you want to export the teams to a file? (y/n): "):
+                    export_teams(teams)
+                break
+        except ValueError:
+            print("Please enter a valid number.")
 
 def pretty_print(teams):
     for i, team in enumerate(teams, start=1):
@@ -302,9 +308,12 @@ def export_teams(teams):
 def validate_yes_no(prompt):
     while True:
         response = input(prompt).lower()
-        if response in ("y", "n"):
-            return response
+        if response == "y":
+            return True
+        elif response == "n":
+            return False
         print("Please enter 'y' or 'n'.")
+
 
 
 # Start program
