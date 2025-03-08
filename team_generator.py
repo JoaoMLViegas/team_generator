@@ -1,6 +1,7 @@
-import random #keep for future use (generating teams without balance considerations)
+import random
 import json
 import os
+import re
 
 # File for storing players and ratings
 PLAYERS_FILE = "players.json"
@@ -313,6 +314,7 @@ def pretty_print(teams, balanced):
 
 def export_teams(teams, balanced):
     filename = input("Enter the filename to save teams (e.g., teams.txt): ")
+    filename = sanitize_filename(filename)
     with open(f"teams/{filename}", "w") as file:
         for i, team in enumerate(teams, start=1):
             if balanced:
@@ -326,6 +328,22 @@ def export_teams(teams, balanced):
                     file.write(f" - {player['name']}\n")
             file.write("\n")
     print(f"Teams exported to {filename}.")
+
+def sanitize_filename(filename, default="teams.txt"):
+    filename = filename.strip()  # Remove extra spaces
+
+    # If no filename is given, use a default
+    if not filename:
+        return default
+
+    # Auto-add .txt if missing
+    if not filename.lower().endswith(".txt"):
+        filename += ".txt"
+
+    # Remove invalid characters for Windows
+    filename = re.sub(r'[\\/:*?"<>|]', '', filename)
+
+    return filename
 
 def validate_yes_no(prompt):
     while True:
