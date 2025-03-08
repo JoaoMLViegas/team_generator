@@ -70,8 +70,9 @@ def generate_from_stored(stored_players):
     team_generator_aux(stored_players, balanced)
 
 def generate_from_input():
-    players = set()
+    players = []  # Use a list instead of a set
     balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
+    
     if balanced:
         print("Enter player names and ratings (type '0' as name to finish).")
     else:
@@ -84,27 +85,30 @@ def generate_from_input():
         if any(p["name"] == player_name for p in players):
             print(f"{player_name} is already in the list.")
             continue
-        
+
         if balanced:
             while True:
                 try:
                     rating = int(input(f"Enter a rating for {player_name} (1-10): "))
                     if 1 <= rating <= 10:
-                        players.add({"name": player_name, "rating": rating})
+                        players.append({"name": player_name, "rating": rating})  # Use list append
                         break
                     else:
                         print("Rating must be between 1 and 10.")
                 except ValueError:
                     print("Please enter a valid number for the rating.")
         else:
-            players.add({"name": player_name})
+            players.append({"name": player_name})  # Use list append
 
     if not players:
         print("No players entered.")
         return
 
-    players = list(players)  # Convert set back to list for team generation
-    team_generator_aux(players, balanced)
+    while True:
+        team_generator_aux(players, balanced)
+        if not validate_yes_no("Do you want to generate teams again using the same players? (y/n): "):
+            break
+
 
 
 # Manage Players
@@ -171,9 +175,10 @@ def list_stored_players(stored_players):
     if not stored_players:
         print("No players stored.")
     else:
-        print("Stored Players:")
-        for player in stored_players:
+        print("Stored Players (sorted by rating):")
+        for player in sorted(stored_players, key=lambda p: p["rating"], reverse=True):  # Sort by rating in descending order
             print(f" - {player['name']} (Rating: {player['rating']})")
+
 
 
 # Manage Teams
@@ -246,10 +251,15 @@ def team_generator(n_teams, players, balanced):
 
     if balanced: # Generate balanced teams by the players' ratings
 
+        # Function to determine rating group (0-10)
+        def get_rating_group(rating):
+            return min(10, int((rating + 0.5) // 1))  # Ensures correct bucket allocation
+
         # Group players by rating
         rating_groups = {}
         for player in players:
-            rating_groups.setdefault(player["rating"], []).append(player)
+            group = get_rating_group(player["rating"])
+            rating_groups.setdefault(group, []).append(player)
 
         # Shuffle players within each rating group
         for group in rating_groups.values():
@@ -281,27 +291,39 @@ def team_generator_aux(players, balanced):
                 print("Number of teams cannot exceed number of players.")
             else:
                 teams = team_generator(n_teams, players, balanced)
-                pretty_print(teams)
+                pretty_print(teams, balanced)
                 if validate_yes_no("Do you want to export the teams to a file? (y/n): "):
-                    export_teams(teams)
+                    export_teams(teams, balanced)
                 break
         except ValueError:
             print("Please enter a valid number.")
 
-def pretty_print(teams):
+def pretty_print(teams, balanced):
     for i, team in enumerate(teams, start=1):
-        print(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team),2)}):")
+        if balanced:
+            print(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team),1)}):")
+        else:
+            print(f"Team {i}:")
         for player in team:
-            print(f" - {player['name']} (Rating: {player['rating']})")
+            if balanced:
+                print(f" - {player['name']} (Rating: {player['rating']})")
+            else:
+                print(f" - {player['name']}")
         print("")
 
-def export_teams(teams):
+def export_teams(teams, balanced):
     filename = input("Enter the filename to save teams (e.g., teams.txt): ")
     with open(f"teams/{filename}", "w") as file:
         for i, team in enumerate(teams, start=1):
-            file.write(f"Team {i} (Total Rating: {sum(player['rating'] for player in team)}):\n")
+            if balanced:
+                file.write(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team),1)}):\n")
+            else:
+                file.write(f"Team {i}:\n")
             for player in team:
-                file.write(f" - {player['name']} (Rating: {player['rating']})\n")
+                if balanced:
+                    file.write(f" - {player['name']} (Rating: {player['rating']})\n")
+                else:
+                    file.write(f" - {player['name']}\n")
             file.write("\n")
     print(f"Teams exported to {filename}.")
 
