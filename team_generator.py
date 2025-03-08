@@ -217,7 +217,7 @@ def visualize_stored_teams():
         if choice == 0:
             return
         selected_file = team_files[choice - 1]
-        with open(selected_file, "r") as file:
+        with open(os.path.join("teams", selected_file), "r") as file:
             print(f"\nContents of {selected_file}:")
             print(file.read())
     except (IndexError, ValueError):

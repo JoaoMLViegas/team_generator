@@ -6,9 +6,8 @@ A terminal-based Python program for generating balanced teams from stored or inp
 - Team Generation: Generate teams from stored players or input new players on the fly.
 - Player Management: Add or remove players from stored data, view stored players, and prevent duplicate entries.
 - File Management: Save generated teams to files for future reference, view stored teams, and delete unwanted team files.
-- Ratings for Balance: Includes a rating system (1-10) for players to ensure balanced team creation.
+- Ratings for Balance: Includes the possibility of using a rating system (1-10) for players to ensure balanced team creation.
 - Menu Interface: Intuitive menu for navigating program options.
-- (in development...) Add option to generate teams without balance considerations
 - (in development...) Allow only a selection of stored players to be used while generating from stored players (now all stored players are used)
 
 ## **Getting Started**
@@ -30,7 +29,7 @@ python team_generator.py
 ```
 
 ## **Usage**
-Upon running, the program will display the main menu, providing the following options:  
+Upon running, the program will display the Main Menu, providing the following options:  
 
 --- Team Generator Main Menu ---  
 1 - Generate Teams Menu  
