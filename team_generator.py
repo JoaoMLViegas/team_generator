@@ -30,12 +30,16 @@ def main_menu():
         else:
             print("Invalid choice. Please try again.")
 
+# Loads players from the file in descending order of rating
 def load_players():
     try:
         with open(PLAYERS_FILE, "r") as file:
-            return json.load(file)
+            players = json.load(file)
+            players.sort(key=lambda x: x["rating"], reverse=True)
+            return players
     except (FileNotFoundError, json.JSONDecodeError):
         return []
+    
     
 def save_players(players):
     with open(PLAYERS_FILE, "w") as file:
@@ -67,11 +71,49 @@ def generate_from_stored(stored_players):
         print("No stored players available. Please add players first.")
         return
     
+    selected_players = player_selection(stored_players)
+
     balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
-    team_generator_aux(stored_players, balanced)
+    team_generator_aux(selected_players, balanced)
+
+def player_selection(stored_players):
+    selected_players = []
+
+    list_stored_players(stored_players)
+    
+    while True:
+        selection_input = input("Enter the numbers of the players you want to include (e.g., '1, 3, 5-7'), or press Enter to select all: ")
+
+        if not selection_input:  # If input is empty, select all players
+            selected_players = stored_players
+            break
+
+        # Validate and parse the input
+        try:
+            ranges = selection_input.split(',')
+            for range_str in ranges:
+                # Check for a single number or a range (e.g., '1' or '1-3')
+                match = re.match(r"(\d+)(-(\d+))?", range_str.strip())
+                if not match:
+                    raise ValueError("Invalid input format")
+
+                start = int(match.group(1)) - 1  # Convert to 0-indexed
+                end = int(match.group(3)) - 1 if match.group(3) else start
+
+                if start < 0 or end < 0 or start >= len(stored_players) or end >= len(stored_players) or start > end:
+                    raise ValueError("Index out of range")
+                
+                # Add the selected players to the list
+                selected_players.extend(stored_players[start:end+1])
+
+            break
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
+    
+    return selected_players
 
 def generate_from_input():
-    players = []  # Use a list instead of a set
+    players = []
     balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
     
     if balanced:
@@ -176,9 +218,13 @@ def list_stored_players(stored_players):
     if not stored_players:
         print("No players stored.")
     else:
-        print("Stored Players (sorted by rating):")
-        for player in sorted(stored_players, key=lambda p: p["rating"], reverse=True):  # Sort by rating in descending order
-            print(f" - {player['name']} (Rating: {player['rating']})")
+        print("\nStored Players (sorted by rating):")
+        # Note that the players were already loaded by rating
+        padding = " "
+        for i in range(len(stored_players)):
+            if i == 9:
+                padding = ""
+            print(f"{padding}{i+1}. {stored_players[i]['name']} (Rating: {stored_players[i]['rating']})")
 
 
 

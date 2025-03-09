@@ -3,12 +3,11 @@
 A terminal-based Python program for generating balanced teams from stored or input player lists. The app includes a menu interface that allows users to add, remove, and view players or teams and to export teams to files.
 
 ## **Features**
-- Team Generation: Generate teams from stored players or input new players on the fly.
+- Team Generation: Generate teams from stored players (all or a selection) or input new players on the fly.
 - Player Management: Add or remove players from stored data, view stored players, and prevent duplicate entries.
 - File Management: Save generated teams to files for future reference, view stored teams, and delete unwanted team files.
 - Ratings for Balance: Includes the possibility of using a rating system (1-10) for players to ensure balanced team creation.
 - Menu Interface: Intuitive menu for navigating program options.
-- (in development...) Allow only a selection of stored players to be used while generating from stored players (now all stored players are used)
 
 ## **Getting Started**
 ### Prerequisites
@@ -46,8 +45,9 @@ Choosing option 1 in the Main Menu will display the following:
 0 - Back to Main Menu  
 
 #### Option description
-1. Generate teams from stored players: Uses the existing list of stored players to form balanced teams based on player ratings.
-2. Generate teams from input players: Lets you enter new players and their ratings to create teams without saving them to storage.
+1. Generate teams from stored players: Uses the existing list of stored players to form teams, choosing which players to include.
+2. Generate teams from input players: Lets you enter new players and their ratings to create teams without saving them to storage.  
+NOTE: In both options, the user will be asked if the players' ratings are to be considered while generating or if the teams are to be completely random.
 
 ### **Manage Players Menu**
 Choosing option 2 in the Main Menu will display the following:
@@ -73,7 +73,7 @@ Choosing option 3 in the Main Menu will display the following:
 
 #### Option description
 1. View stored teams: Lists available team files and allows you to view the contents of a selected file.
-2. Remove stored team: Lists and deletes unwanted team files from storage.
+2. Remove stored team: Lists and allows deletion of unwanted team files from storage.
 
 ## **Project Structure**
 team_generator/  
