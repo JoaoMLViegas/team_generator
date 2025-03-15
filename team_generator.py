@@ -3,6 +3,8 @@ import json
 import os
 import re
 
+DECIMALS = 1
+
 # File for storing players and ratings
 PLAYERS_FILE = "players.json"
 
@@ -132,12 +134,13 @@ def generate_from_input():
         if balanced:
             while True:
                 try:
-                    rating = int(input(f"Enter a rating for {player_name} (1-10): "))
+                    rating = input(f"Enter a rating for {player_name} (1.0-10.0): ")
                     if 1 <= rating <= 10:
+                        rating = round(rating, DECIMALS)
                         players.append({"name": player_name, "rating": rating})  # Use list append
                         break
                     else:
-                        print("Rating must be between 1 and 10.")
+                        print("Rating must be between 1 and 10, with 1 decimal place.")
                 except ValueError:
                     print("Please enter a valid number for the rating.")
         else:
@@ -188,11 +191,12 @@ def add_players(stored_players):
         else:
             while True:
                 try:
-                    rating = int(input(f"Enter a rating for {player} (1-10): "))
+                    rating = input(f"Enter a rating for {player} (1.0-10.0): ")
                     if 1 <= rating <= 10:
+                        rating = round(rating, DECIMALS)
                         break
                     else:
-                        print("Rating must be between 1 and 10.")
+                        print("Rating must be between 1 and 10, with 1 decimal place.")
                 except ValueError:
                     print("Please enter a valid number for the rating.")
             stored_players.append({"name": player, "rating": rating})
@@ -298,7 +302,7 @@ def team_generator(n_teams, players, balanced):
 
     if balanced: # Generate balanced teams by the players' ratings
 
-        # Function to determine rating group (0-10)
+        # Function to determine rating group (1-10)
         def get_rating_group(rating):
             return min(10, int((rating + 0.5) // 1))  # Ensures correct bucket allocation
 
@@ -348,7 +352,7 @@ def team_generator_aux(players, balanced):
 def pretty_print(teams, balanced):
     for i, team in enumerate(teams, start=1):
         if balanced:
-            print(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team),1)}):")
+            print(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team), DECIMALS)}):")
         else:
             print(f"Team {i}:")
         for player in team:
@@ -364,7 +368,7 @@ def export_teams(teams, balanced):
     with open(f"teams/{filename}", "w") as file:
         for i, team in enumerate(teams, start=1):
             if balanced:
-                file.write(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team),1)}):\n")
+                file.write(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team), DECIMALS)}):\n")
             else:
                 file.write(f"Team {i}:\n")
             for player in team:
