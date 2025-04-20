@@ -134,7 +134,7 @@ def generate_from_input():
         if balanced:
             while True:
                 try:
-                    rating = input(f"Enter a rating for {player_name} (1.0-10.0): ")
+                    rating = float(input(f"Enter a rating for {player_name} (1.0-10.0): "))
                     if 1 <= rating <= 10:
                         rating = round(rating, DECIMALS)
                         players.append({"name": player_name, "rating": rating})  # Use list append
@@ -191,7 +191,7 @@ def add_players(stored_players):
         else:
             while True:
                 try:
-                    rating = input(f"Enter a rating for {player} (1.0-10.0): ")
+                    rating = float(input(f"Enter a rating for {player} (1.0-10.0): "))
                     if 1 <= rating <= 10:
                         rating = round(rating, DECIMALS)
                         break
@@ -201,6 +201,7 @@ def add_players(stored_players):
                     print("Please enter a valid number for the rating.")
             stored_players.append({"name": player, "rating": rating})
             print(f"{player} with rating {rating} added to stored players.")
+    stored_players.sort(key=lambda x: x["rating"], reverse=True)
     save_players(stored_players)
 
 def remove_player(stored_players):
@@ -223,7 +224,7 @@ def list_stored_players(stored_players):
         print("No players stored.")
     else:
         print("\nStored Players (sorted by rating):")
-        # Note that the players were already loaded by rating
+        # Note that the players are supposedly already loaded by rating
         padding = " "
         for i in range(len(stored_players)):
             if i == 9:
