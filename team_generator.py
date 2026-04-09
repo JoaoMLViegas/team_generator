@@ -8,6 +8,9 @@ DECIMALS = 1
 # File for storing players and ratings
 PLAYERS_FILE = "players.json"
 
+# Directory for storing generated teams
+TEAMS_DIR = "teams/"
+
 def main_menu():
     stored_players = load_players()
     
@@ -255,7 +258,11 @@ def manage_teams_menu():
             print("Invalid choice. Please try again.")
 
 def visualize_stored_teams():
-    team_files = [f for f in os.listdir("teams/") if f.endswith(".txt")]
+    if not os.path.exists(TEAMS_DIR):
+        print("No teams folder found.")
+        return
+    
+    team_files = [f for f in os.listdir(TEAMS_DIR) if f.endswith(".txt")]
     if not team_files:
         print("No stored team files found.")
         return
@@ -269,14 +276,18 @@ def visualize_stored_teams():
         if choice == 0:
             return
         selected_file = team_files[choice - 1]
-        with open(os.path.join("teams", selected_file), "r") as file:
+        with open(os.path.join(TEAMS_DIR, selected_file), "r") as file:
             print(f"\nContents of {selected_file}:")
             print(file.read())
     except (IndexError, ValueError):
         print("Invalid choice. Returning to main menu.")
 
 def remove_stored_team():
-    team_files = [f for f in os.listdir() if f.endswith(".txt")]
+    if not os.path.exists(TEAMS_DIR):
+        print("No teams folder found.")
+        return
+    
+    team_files = [f for f in os.listdir(TEAMS_DIR) if f.endswith(".txt")]
     if not team_files:
         print("No stored team files found.")
         return
@@ -290,7 +301,7 @@ def remove_stored_team():
         if choice == 0:
             return
         selected_file = team_files[choice - 1]
-        os.remove(selected_file)
+        os.remove(os.path.join(TEAMS_DIR, selected_file))
         print(f"{selected_file} has been deleted.")
     except (IndexError, ValueError):
         print("Invalid choice. Returning to main menu.")
@@ -367,7 +378,9 @@ def pretty_print(teams, balanced):
 def export_teams(teams, balanced):
     filename = input("Enter the filename to save teams (e.g., teams.txt): ")
     filename = sanitize_filename(filename)
-    with open(f"teams/{filename}", "w") as file:
+    if not os.path.exists(TEAMS_DIR):
+        os.makedirs(TEAMS_DIR)
+    with open(f"{TEAMS_DIR}/{filename}", "w") as file:
         for i, team in enumerate(teams, start=1):
             if balanced:
                 file.write(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team), DECIMALS)}):\n")
