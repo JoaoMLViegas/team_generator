@@ -48,7 +48,7 @@ def load_players():
     
 def save_players(players):
     with open(PLAYERS_FILE, "w") as file:
-        json.dump(players, file)
+        json.dump(players, file, indent=2)
 
 
 # Generate Teams
