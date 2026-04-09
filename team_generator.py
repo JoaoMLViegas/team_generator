@@ -311,31 +311,26 @@ def team_generator(n_teams, players, balanced):
 
     if balanced: # Generate balanced teams by the players' ratings
 
-        # Function to determine rating group (1-10)
-        def get_rating_group(rating):
-            return min(10, int((rating + 0.5) // 1))  # Ensures correct bucket allocation
+        # Sort players by rating (highest first), with a small random jitter (+/- 0.4)
+        # to shuffle similarly-rated players into different orders on each run.
+        # This prevents generating identical teams for the same input, while keeping 
+        # players with meaningfully different ratings in the correct relative order.
+        # The jitter is discarded after sorting.
+        jittered = sorted(
+            players,
+            key=lambda p: p["rating"] + random.uniform(-0.4, 0.4),
+            reverse=True
+        )
 
-        # Group players by rating
-        rating_groups = {}
-        for player in players:
-            group = get_rating_group(player["rating"])
-            rating_groups.setdefault(group, []).append(player)
-
-        # Shuffle players within each rating group
-        for group in rating_groups.values():
-            random.shuffle(group)
-
-        # Bring back together all players in descending order of rating groups
-        sorted_players = [player for rating in sorted(rating_groups.keys(), reverse=True) for player in rating_groups[rating]]
-
-        # Distribute players across teams
         teams = [[] for _ in range(n_teams)]
-        team_ratings = [0] * n_teams
+        team_ratings = [0.0] * n_teams
 
-        for player in sorted_players:
-            min_team_index = team_ratings.index(min(team_ratings))
-            teams[min_team_index].append(player)
-            team_ratings[min_team_index] += player["rating"]
+        for player in jittered:
+            # Always assign to the weakest team (greedy assignment)
+            # This minimises the total rating difference across teams
+            weakest = team_ratings.index(min(team_ratings))
+            teams[weakest].append(player)
+            team_ratings[weakest] += player["rating"]
 
     else: # Generate teams randomly
         random.shuffle(players)
