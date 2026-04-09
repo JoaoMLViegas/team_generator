@@ -111,6 +111,7 @@ def player_selection(stored_players):
             break
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
+            selected_players = []
     
     return selected_players
 
