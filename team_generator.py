@@ -82,41 +82,37 @@ def generate_from_stored(stored_players):
     team_generator_aux(selected_players, balanced)
 
 def player_selection(stored_players):
-    selected_players = []
-
     list_stored_players(stored_players)
     
     while True:
         selection_input = input("Enter the numbers of the players you want to include (e.g., '1, 3, 5-7'), or press Enter to select all: ")
 
         if not selection_input:  # If input is empty, select all players
-            selected_players = stored_players
-            break
+            return stored_players
 
-        # Validate and parse the input
+        selected_indices = set() # Using a set to prevent duplicates
         try:
             ranges = selection_input.split(',')
             for range_str in ranges:
                 # Check for a single number or a range (e.g., '1' or '1-3')
                 match = re.match(r"(\d+)(-(\d+))?", range_str.strip())
                 if not match:
-                    raise ValueError("Invalid input format")
+                    raise ValueError(f"Invalid input format in '{range_str}'")
 
                 start = int(match.group(1)) - 1  # Convert to 0-indexed
                 end = int(match.group(3)) - 1 if match.group(3) else start
 
                 if start < 0 or end < 0 or start >= len(stored_players) or end >= len(stored_players) or start > end:
-                    raise ValueError("Index out of range")
+                    raise ValueError(f"Index out of range in {range_str}")
                 
-                # Add the selected players to the list
-                selected_players.extend(stored_players[start:end+1])
+                # Add every index in that range to the set
+                for i in range(start, end + 1):
+                    selected_indices.add(i)
 
-            break
+            return [stored_players[i] for i in sorted(selected_indices)]
+        
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
-            selected_players = []
-    
-    return selected_players
 
 def generate_from_input():
     players = []
