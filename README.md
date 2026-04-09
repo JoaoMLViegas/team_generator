@@ -3,11 +3,11 @@
 A terminal-based Python program for generating balanced teams from stored or input player lists. The app includes a menu interface that allows users to add, remove, and view players or teams and to export teams to files.
 
 ## **Features**
-- Team Generation: Generate teams from stored players (all or a selection) or input new players on the fly.
-- Player Management: Add or remove players from stored data, view stored players, and prevent duplicate entries.
-- File Management: Save generated teams to files for future reference, view stored teams, and delete unwanted team files.
-- Ratings for Balance: Includes the possibility of using a rating system (1-10) for players to ensure balanced team creation.
-- Menu Interface: Intuitive menu for navigating program options.
+- Advanced Player Selection: Quickly choose participants from your roster using individual numbers or ranges (e.g., 1, 3, 5-10).
+- Fair-Play Balancing: Uses a Jittered Greedy Algorithm to ensure teams are balanced by skill level while providing variety between generations.
+- Player Roster Management: Add, remove, and view players with persistent storage in a human-readable JSON format.
+- Team Export: Save generated lineups to .txt files with automatic folder management and filename sanitisation.
+- Clean CLI Interface: Simple, numbered menus for easy navigation.
 
 ## **Getting Started**
 ### Prerequisites
@@ -46,8 +46,8 @@ Choosing option 1 in the Main Menu will display the following:
 
 #### Option description
 1. Generate teams from stored players: Uses the existing list of stored players to form teams, choosing which players to include.
-2. Generate teams from input players: Lets you enter new players and their ratings to create teams without saving them to storage.  
-NOTE: In both options, the user will be asked if the players' ratings are to be considered while generating or if the teams are to be completely random.
+2. Generate teams from input players: Let's you enter new players and their ratings to create teams without saving them to storage.  
+<br>NOTE: In both options, the user will be asked whether the players' ratings should be considered when generating or if the teams should be completely random.
 
 ### **Manage Players Menu**
 Choosing option 2 in the Main Menu will display the following:
@@ -59,7 +59,7 @@ Choosing option 2 in the Main Menu will display the following:
 0 - Back to Main Menu  
 
 #### Option description
-1. Add to stored players: Add new players with ratings (1-10) to the stored player list, ensuring no duplicate entries.
+1. Add to stored players: Add new players with ratings (1.0-10.0) to the stored player list, ensuring no duplicate entries.
 2. Remove from stored players: Remove specific players from storage.
 3. List stored players: Displays the list of stored players and their ratings.
 
@@ -75,13 +75,26 @@ Choosing option 3 in the Main Menu will display the following:
 1. View stored teams: Lists available team files and allows you to view the contents of a selected file.
 2. Remove stored team: Lists and allows deletion of unwanted team files from storage.
 
+## Technical Details
+### The Balancing Algorithm
+To ensure teams are fair but not identical every time you generate them, the app uses a Jittered Greedy Assignment:
+1. Jitter: A random value between $\pm 0.4$ is temporarily added to each player's rating. This allows players with similar skill levels to occasionally swap "rank" positions.
+2. Sort: Players are sorted by this jittered rating.
+3. Greedy Assignment: The algorithm iterates through the sorted list and assigns the next player to whichever team currently has the lowest total rating.
+
+### Data Storage
+- Players: Stored in players.json with a 2-space indentation for easy manual editing if needed.
+- Teams: Exported to the /teams directory. The program automatically creates this folder if it doesn't exist.
+
 ## **Project Structure**
+```
 team_generator/  
-├── team_generator.py &emsp;# Main app code with tkinter GUI  
-├── players.json &emsp;# File to store player data  
-├── teams/ &emsp;# Folder to store generated team files  
-├── README.md &emsp;# Project documentation  
-└── LICENSE &emsp;# Project license  
+├── team_generator.py  # Main application logic  
+├── players.json       # File to store player data  
+├── teams/             # Directory to store generated team files  
+├── README.md          # Documentation  
+└── LICENSE            # License  
+```
 
 ## **License**
 This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).  
