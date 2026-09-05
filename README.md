@@ -11,52 +11,52 @@ A terminal-based Python program for generating balanced teams from stored or inp
 
 ## **Getting Started**
 ### Prerequisites
-- **Python**: Ensure you have Python installed. To check, run: 
-``` 
+- **Python**: Ensure you have Python installed. To check, run:
+```
 python --version
 ```
 
 ### Installation
-1. Clone the repository:  
+1. Clone the repository:
 ```
-git clone https://github.com/JoaoMLViegas/team_generator.git  
+git clone https://github.com/JoaoMLViegas/team_generator.git
 cd team_generator
 ```
-2. Run the app:  
+2. Run the app:
 ```
 python team_generator.py
 ```
 
 ## **Usage**
-Upon running, the program will display the Main Menu, providing the following options:  
+Upon running, the program will display the Main Menu, providing the following options:
 
---- Team Generator Main Menu ---  
-1 - Generate Teams Menu  
-2 - Manage Players Menu  
-3 - Manage Teams Menu  
-0 - Exit program  
+--- Team Generator Main Menu ---
+1 - Generate Teams Menu
+2 - Manage Players Menu
+3 - Manage Teams Menu
+0 - Exit program
 
 ### **Generate Teams Menu**
 Choosing option 1 in the Main Menu will display the following:
 
---- Generate Teams Menu ---  
-1 - Generate teams from stored players  
-2 - Generate teams from input players  
-0 - Back to Main Menu  
+--- Generate Teams Menu ---
+1 - Generate teams from stored players
+2 - Generate teams from input players
+0 - Back to Main Menu
 
 #### Option description
 1. Generate teams from stored players: Uses the existing list of stored players to form teams, choosing which players to include.
-2. Generate teams from input players: Let's you enter new players and their ratings to create teams without saving them to storage.  
+2. Generate teams from input players: Let's you enter new players and their ratings to create teams without saving them to storage.
 <br>NOTE: In both options, the user will be asked whether the players' ratings should be considered when generating or if the teams should be completely random.
 
 ### **Manage Players Menu**
 Choosing option 2 in the Main Menu will display the following:
 
---- Manage Players Menu ---  
-1 - Add to stored players  
-2 - Remove from stored players  
-3 - List stored players  
-0 - Back to Main Menu  
+--- Manage Players Menu ---
+1 - Add to stored players
+2 - Remove from stored players
+3 - List stored players
+0 - Back to Main Menu
 
 #### Option description
 1. Add to stored players: Add new players with ratings (1.0-10.0) to the stored player list, ensuring no duplicate entries.
@@ -66,10 +66,10 @@ Choosing option 2 in the Main Menu will display the following:
 ### **Manage Teams Menu**
 Choosing option 3 in the Main Menu will display the following:
 
---- Manage Teams Menu ---  
-1 - View stored teams  
-2 - Remove stored team  
-0 - Back to Main Menu  
+--- Manage Teams Menu ---
+1 - View stored teams
+2 - Remove stored team
+0 - Back to Main Menu
 
 #### Option description
 1. View stored teams: Lists available team files and allows you to view the contents of a selected file.
@@ -88,14 +88,14 @@ To ensure teams are fair but not identical every time you generate them, the app
 
 ## **Project Structure**
 ```
-team_generator/  
-├── team_generator.py  # Main application logic  
-├── players.json       # File to store player data  
-├── teams/             # Directory to store generated team files  
-├── README.md          # Documentation  
-└── LICENSE            # License  
+team_generator/
+├── team_generator.py  # Main application logic
+├── players.json       # File to store player data
+├── teams/             # Directory to store generated team files
+├── README.md          # Documentation
+└── LICENSE            # License
 ```
 
 ## **License**
-This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).  
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
 See the [LICENSE](LICENSE) file for more details.

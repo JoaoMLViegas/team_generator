@@ -14,16 +14,16 @@ TEAMS_DIR = "teams/"
 
 def main_menu():
     stored_players = load_players()
-    
+
     while True:
         print("\n--- Team Generator Main Menu ---")
         print("1 - Generate Teams Menu")
         print("2 - Manage Players Menu")
         print("3 - Manage Teams Menu")
         print("0 - Exit program")
-        
+
         choice = input("Select an option: ")
-        
+
         if choice == "1":
             generate_teams_menu(stored_players)
         elif choice == "2":
@@ -45,8 +45,8 @@ def load_players():
             return players
     except (FileNotFoundError, json.JSONDecodeError):
         return []
-    
-    
+
+
 def save_players(players):
     with open(PLAYERS_FILE, "w") as file:
         json.dump(players, file, indent=2)
@@ -60,9 +60,9 @@ def generate_teams_menu(stored_players):
         print("1 - Generate teams from stored players")
         print("2 - Generate teams from input players")
         print("0 - Back to Main Menu")
-        
+
         choice = input("Select an option: ")
-        
+
         if choice == "1":
             generate_from_stored(stored_players)
         elif choice == "2":
@@ -76,7 +76,7 @@ def generate_from_stored(stored_players):
     if not stored_players:
         print("No stored players available. Please add players first.")
         return
-    
+
     selected_players = player_selection(stored_players)
 
     balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
@@ -84,7 +84,7 @@ def generate_from_stored(stored_players):
 
 def player_selection(stored_players):
     list_stored_players(stored_players)
-    
+
     while True:
         selection_input = input("Enter the numbers of the players you want to include (e.g., '1, 3, 5-7'), or press Enter to select all: ")
 
@@ -105,20 +105,20 @@ def player_selection(stored_players):
 
                 if start < 0 or end < 0 or start >= len(stored_players) or end >= len(stored_players) or start > end:
                     raise ValueError(f"Index out of range in {range_str}")
-                
+
                 # Add every index in that range to the set
                 for i in range(start, end + 1):
                     selected_indices.add(i)
 
             return [stored_players[i] for i in sorted(selected_indices)]
-        
+
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
 
 def generate_from_input():
     players = []
     balanced = validate_yes_no("Do you want to balance the teams using the players' ratings? (y/n): ")
-    
+
     if balanced:
         print("Enter player names and ratings (type '0' as name to finish).")
     else:
@@ -167,9 +167,9 @@ def manage_players_menu(stored_players):
         print("2 - Remove from stored players")
         print("3 - List stored players")
         print("0 - Back to Main Menu")
-        
+
         choice = input("Select an option: ")
-        
+
         if choice == "1":
             add_players(stored_players)
         elif choice == "2":
@@ -239,9 +239,9 @@ def manage_teams_menu():
         print("1 - View stored teams")
         print("2 - Remove stored team")
         print("0 - Back to Main Menu")
-        
+
         choice = input("Select an option: ")
-        
+
         if choice == "1":
             visualize_stored_teams()
         elif choice == "2":
@@ -255,16 +255,16 @@ def visualize_stored_teams():
     if not os.path.exists(TEAMS_DIR):
         print("No teams folder found.")
         return
-    
+
     team_files = [f for f in os.listdir(TEAMS_DIR) if f.endswith(".txt")]
     if not team_files:
         print("No stored team files found.")
         return
-    
+
     print("Available team files:")
     for i, file in enumerate(team_files, start=1):
         print(f"{i} - {file}")
-    
+
     try:
         choice = int(input("Enter the number of the file to view (0 to cancel): "))
         if choice == 0:
@@ -280,7 +280,7 @@ def remove_stored_team():
     if not os.path.exists(TEAMS_DIR):
         print("No teams folder found.")
         return
-    
+
     team_files = [f for f in os.listdir(TEAMS_DIR) if f.endswith(".txt")]
     if not team_files:
         print("No stored team files found.")
@@ -311,7 +311,7 @@ def team_generator(n_teams, players, balanced):
 
         # Sort players by rating (highest first), with a small random jitter (+/- 0.4)
         # to shuffle similarly-rated players into different orders on each run.
-        # This prevents generating identical teams for the same input, while keeping 
+        # This prevents generating identical teams for the same input, while keeping
         # players with meaningfully different ratings in the correct relative order.
         # The jitter is discarded after sorting.
         jittered = sorted(
