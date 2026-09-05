@@ -1,5 +1,6 @@
 import random
 import json
+import math
 import os
 import re
 
@@ -127,7 +128,7 @@ def generate_from_input():
         player_name = input("Player name: ")
         if player_name == "0":
             break
-        if any(p["name"] == player_name for p in players):
+        if any(p["name"].casefold() == player_name.casefold() for p in players):
             print(f"{player_name} is already in the list.")
             continue
 
@@ -135,7 +136,7 @@ def generate_from_input():
             while True:
                 try:
                     rating = float(input(f"Enter a rating for {player_name} (1.0-10.0): "))
-                    if 1 <= rating <= 10:
+                    if math.isfinite(rating) and 1 <= rating <= 10:
                         rating = round(rating, DECIMALS)
                         players.append({"name": player_name, "rating": rating})  # Use list append
                         break
@@ -186,13 +187,13 @@ def add_players(stored_players):
         player = input("Player name: ")
         if player == "0":
             break
-        if any(p["name"] == player for p in stored_players):
+        if any(p["name"].casefold() == player.casefold() for p in stored_players):
             print(f"{player} is already in stored players.")
         else:
             while True:
                 try:
                     rating = float(input(f"Enter a rating for {player} (1.0-10.0): "))
-                    if 1 <= rating <= 10:
+                    if math.isfinite(rating) and 1 <= rating <= 10:
                         rating = round(rating, DECIMALS)
                         break
                     else:
@@ -224,12 +225,9 @@ def list_stored_players(stored_players):
         print("No players stored.")
     else:
         print("\nStored Players (sorted by rating):")
-        # Note that the players are supposedly already loaded by rating
-        padding = " "
-        for i in range(len(stored_players)):
-            if i == 9:
-                padding = ""
-            print(f"{padding}{i+1}. {stored_players[i]['name']} (Rating: {stored_players[i]['rating']})")
+        max_width = len(str(len(stored_players)))
+        for i, player in enumerate(stored_players, start=1):
+            print(f"{i:>{max_width}}. {player['name']} (Rating: {player['rating']})")
 
 
 
@@ -324,11 +322,14 @@ def team_generator(n_teams, players, balanced):
 
         teams = [[] for _ in range(n_teams)]
         team_ratings = [0.0] * n_teams
+        max_team_size = (len(players) + n_teams - 1) // n_teams
 
         for player in jittered:
-            # Always assign to the weakest team (greedy assignment)
-            # This minimises the total rating difference across teams
-            weakest = team_ratings.index(min(team_ratings))
+            # Assign to the weakest team that still has room.
+            available_teams = [
+                i for i, team in enumerate(teams) if len(team) < max_team_size
+            ]
+            weakest = min(available_teams, key=team_ratings.__getitem__)
             teams[weakest].append(player)
             team_ratings[weakest] += player["rating"]
 
@@ -342,7 +343,9 @@ def team_generator_aux(players, balanced):
     while True:
         try:
             n_teams = int(input("How many teams do you want? "))
-            if n_teams > len(players):
+            if n_teams <= 0:
+                print("Number of teams must be greater than zero.")
+            elif n_teams > len(players):
                 print("Number of teams cannot exceed number of players.")
             else:
                 teams = team_generator(n_teams, players, balanced)
@@ -356,7 +359,8 @@ def team_generator_aux(players, balanced):
 def pretty_print(teams, balanced):
     for i, team in enumerate(teams, start=1):
         if balanced:
-            print(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team), DECIMALS)}):")
+            average_rating = round(sum(player["rating"] for player in team) / len(team), DECIMALS) if team else 0
+            print(f"Team {i} (Average Rating: {average_rating}):")
         else:
             print(f"Team {i}:")
         for player in team:
@@ -374,7 +378,8 @@ def export_teams(teams, balanced):
     with open(f"{TEAMS_DIR}/{filename}", "w") as file:
         for i, team in enumerate(teams, start=1):
             if balanced:
-                file.write(f"Team {i} (Average Rating: {round(sum(player['rating'] for player in team)/len(team), DECIMALS)}):\n")
+                average_rating = round(sum(player["rating"] for player in team) / len(team), DECIMALS) if team else 0
+                file.write(f"Team {i} (Average Rating: {average_rating}):\n")
             else:
                 file.write(f"Team {i}:\n")
             for player in team:
@@ -398,6 +403,10 @@ def sanitize_filename(filename, default="teams.txt"):
 
     # Remove invalid characters for Windows
     filename = re.sub(r'[\\/:*?"<>|]', '', filename)
+
+    # Fall back if filtering removed the entire base name
+    if not filename[:-4]:
+        return default
 
     return filename
 
