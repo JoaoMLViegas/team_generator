@@ -166,6 +166,7 @@ def manage_players_menu(stored_players):
         print("1 - Add to stored players")
         print("2 - Remove from stored players")
         print("3 - List stored players")
+        print("4 - Edit player rating")
         print("0 - Back to Main Menu")
 
         choice = input("Select an option: ")
@@ -176,6 +177,8 @@ def manage_players_menu(stored_players):
             remove_player(stored_players)
         elif choice == "3":
             list_stored_players(stored_players)
+        elif choice == "4":
+            edit_player_rating(stored_players)
         elif choice == "0":
             return
         else:
@@ -219,6 +222,37 @@ def remove_player(stored_players):
         print(f"{player_name} removed from stored players.")
     else:
         print(f"{player_name} not found in stored players.")
+
+def edit_player_rating(stored_players):
+    if not stored_players:
+        print("No players to edit.")
+        return
+
+    player_name = input("Enter the player name to edit (type '0' to cancel): ")
+    if player_name == "0":
+        return
+
+    player = next(
+        (p for p in stored_players if p["name"].casefold() == player_name.casefold()),
+        None,
+    )
+    if not player:
+        print(f"{player_name} not found in stored players.")
+        return
+
+    while True:
+        try:
+            rating = float(input(f"Enter a new rating for {player['name']} (1.0-10.0): "))
+            if math.isfinite(rating) and 1 <= rating <= 10:
+                player["rating"] = round(rating, DECIMALS)
+                break
+            print("Rating must be between 1 and 10, with 1 decimal place.")
+        except ValueError:
+            print("Please enter a valid number for the rating.")
+
+    stored_players.sort(key=lambda x: x["rating"], reverse=True)
+    save_players(stored_players)
+    print(f"{player['name']} rating updated to {player['rating']}.")
 
 def list_stored_players(stored_players):
     if not stored_players:
