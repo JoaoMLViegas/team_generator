@@ -3,6 +3,8 @@ import json
 import math
 import os
 import re
+import platform
+import subprocess
 
 DECIMALS = 1
 
@@ -386,23 +388,53 @@ def team_generator_aux(players, balanced):
                 pretty_print(teams, balanced)
                 if validate_yes_no("Do you want to export the teams to a file? (y/n): "):
                     export_teams(teams, balanced)
+                if validate_yes_no("Do you want to copy the teams to the clipboard? (y/n): "):
+                    copy_teams_to_clipboard(teams, balanced)
                 break
         except ValueError:
             print("Please enter a valid number.")
 
-def pretty_print(teams, balanced):
+def format_teams(teams, balanced):
+    output = []
     for i, team in enumerate(teams, start=1):
         if balanced:
             average_rating = round(sum(player["rating"] for player in team) / len(team), DECIMALS) if team else 0
-            print(f"Team {i} (Average Rating: {average_rating}):")
+            output.append(f"Team {i} (Average Rating: {average_rating}):")
         else:
-            print(f"Team {i}:")
+            output.append(f"Team {i}:")
         for player in team:
             if balanced:
-                print(f" - {player['name']} (Rating: {player['rating']})")
+                output.append(f" - {player['name']} (Rating: {player['rating']})")
             else:
-                print(f" - {player['name']}")
-        print("")
+                output.append(f" - {player['name']}")
+        output.append("")
+    return "\n".join(output) + "\n"
+
+def pretty_print(teams, balanced):
+    print(format_teams(teams, balanced), end="")
+
+def copy_teams_to_clipboard(teams, balanced):
+  text = format_teams(teams, balanced)
+  system = platform.system()
+
+  try:
+    if system == "Windows":
+      subprocess.run("clip", input=text.strip(), text=True, check=True)
+    elif system == "Darwin":
+      subprocess.run("pbcopy", input=text, text=True, check=True)
+    elif system == "Linux":
+      subprocess.run(
+          ["xclip", "-selection", "clipboard"],
+          input=text,
+          text=True,
+          check=True,
+      )
+    else:
+      raise OSError("Unsupported operating system")
+
+    print("Teams copied to the clipboard.")
+  except Exception:
+    print("Unable to copy teams to the clipboard.")
 
 def export_teams(teams, balanced):
     filename = input("Enter the filename to save teams (e.g., teams.txt): ")
@@ -410,18 +442,7 @@ def export_teams(teams, balanced):
     if not os.path.exists(TEAMS_DIR):
         os.makedirs(TEAMS_DIR)
     with open(f"{TEAMS_DIR}/{filename}", "w") as file:
-        for i, team in enumerate(teams, start=1):
-            if balanced:
-                average_rating = round(sum(player["rating"] for player in team) / len(team), DECIMALS) if team else 0
-                file.write(f"Team {i} (Average Rating: {average_rating}):\n")
-            else:
-                file.write(f"Team {i}:\n")
-            for player in team:
-                if balanced:
-                    file.write(f" - {player['name']} (Rating: {player['rating']})\n")
-                else:
-                    file.write(f" - {player['name']}\n")
-            file.write("\n")
+        file.write(format_teams(teams, balanced))
     print(f"Teams exported to {filename}.")
 
 def sanitize_filename(filename, default="teams.txt"):
