@@ -5,6 +5,7 @@ import os
 import re
 import platform
 import subprocess
+import shutil
 
 DECIMALS = 1
 
@@ -423,12 +424,14 @@ def copy_teams_to_clipboard(teams, balanced):
     elif system == "Darwin":
       subprocess.run("pbcopy", input=text, text=True, check=True)
     elif system == "Linux":
-      subprocess.run(
-          ["xclip", "-selection", "clipboard"],
-          input=text,
-          text=True,
-          check=True,
-      )
+        if shutil.which("wl-copy"):
+                subprocess.run(["wl-copy"], input=text, text=True, check=True)
+        elif shutil.which("clip.exe"):
+                subprocess.run(["clip.exe"], input=text.strip(), text=True, check=True)
+        elif shutil.which("xclip"):
+                subprocess.run(["xclip", "-selection", "clipboard"], input=text, text=True, check=True)
+        elif shutil.which("xsel"):
+                subprocess.run(["xsel", "--clipboard", "--input"], input=text, text=True, check=True)
     else:
       raise OSError("Unsupported operating system")
 
