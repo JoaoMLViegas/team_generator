@@ -41,7 +41,7 @@ def main_menu():
 # Loads players from the file in descending order of rating
 def load_players():
     try:
-        with open(PLAYERS_FILE, "r") as file:
+        with open(PLAYERS_FILE, "r", encoding="utf-8") as file:
             players = json.load(file)
             players.sort(key=lambda x: x["rating"], reverse=True)
             return players
@@ -51,8 +51,8 @@ def load_players():
 
 def save_players(players):
     temp_file = f"{PLAYERS_FILE}.tmp"
-    with open(PLAYERS_FILE, "w") as file:
-        json.dump(players, file, indent=2)
+    with open(temp_file, "w", encoding="utf-8") as file:
+        json.dump(players, file, indent=2, ensure_ascii=False)
     os.replace(temp_file, PLAYERS_FILE)
 
 
@@ -421,22 +421,28 @@ def copy_teams_to_clipboard(teams, balanced):
   text = format_teams(teams, balanced)
   system = platform.system()
 
-  try:
+  try: # Proper encoding will be necessary for non-ASCII characters
     if system == "Windows":
-      subprocess.run("clip", input=text.strip(), text=True, check=True)
+        subprocess.run("clip", input=text.strip().encode("utf-16le"), check=True)
     elif system == "Darwin":
-      subprocess.run("pbcopy", input=text, text=True, check=True)
+        subprocess.run("pbcopy", input=text.encode("utf-8"), check=True)
     elif system == "Linux":
-        if shutil.which("wl-copy"):
-                subprocess.run(["wl-copy"], input=text, text=True, check=True)
-        elif shutil.which("clip.exe"):
-                subprocess.run(["clip.exe"], input=text.strip(), text=True, check=True)
+        if shutil.which("clip.exe"):
+            subprocess.run(["clip.exe"], input=text.strip().encode("utf-16le"), check=True)
+        elif shutil.which("wl-copy"):
+            subprocess.run(["wl-copy"], input=text.encode("utf-8"), check=True)
         elif shutil.which("xclip"):
-                subprocess.run(["xclip", "-selection", "clipboard"], input=text, text=True, check=True)
+            subprocess.run(
+                ["xclip", "-selection", "clipboard", "-target", "UTF8_STRING"],
+                input=text.encode("utf-8"),
+                check=True,
+            )
         elif shutil.which("xsel"):
-                subprocess.run(["xsel", "--clipboard", "--input"], input=text, text=True, check=True)
+            subprocess.run(["xsel", "--clipboard", "--input"], input=text.encode("utf-8"), check=True)
+        else:
+            raise RuntimeError("No supported clipboard utility found (clip.exe, wl-copy, xclip, xsel).")
     else:
-      raise OSError("Unsupported operating system")
+        raise OSError("Unsupported operating system")
 
     print("Teams copied to the clipboard.")
   except Exception:
@@ -447,7 +453,7 @@ def export_teams(teams, balanced):
     filename = sanitize_filename(filename)
     if not os.path.exists(TEAMS_DIR):
         os.makedirs(TEAMS_DIR)
-    with open(f"{TEAMS_DIR}/{filename}", "w") as file:
+    with open(f"{TEAMS_DIR}/{filename}", "w", encoding="utf-8") as file:
         file.write(format_teams(teams, balanced))
     print(f"Teams exported to {filename}.")
 
