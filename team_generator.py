@@ -16,7 +16,6 @@ PLAYERS_FILE = "players.json"
 TEAMS_DIR = "teams/"
 
 def main_menu():
-    stored_players = load_players()
 
     while True:
         print("\n--- Team Generator Main Menu ---")
@@ -28,9 +27,9 @@ def main_menu():
         choice = input("Select an option: ")
 
         if choice == "1":
-            generate_teams_menu(stored_players)
+            generate_teams_menu()
         elif choice == "2":
-            manage_players_menu(stored_players)
+            manage_players_menu()
         elif choice == "3":
             manage_teams_menu()
         elif choice == "0":
@@ -59,7 +58,7 @@ def save_players(players):
 
 # Generate Teams
 
-def generate_teams_menu(stored_players):
+def generate_teams_menu():
     while True:
         print("\n--- Generate Teams Menu ---")
         print("1 - Generate teams from stored players")
@@ -69,7 +68,7 @@ def generate_teams_menu(stored_players):
         choice = input("Select an option: ")
 
         if choice == "1":
-            generate_from_stored(stored_players)
+            generate_from_stored()
         elif choice == "2":
             generate_from_input()
         elif choice == "0":
@@ -77,7 +76,8 @@ def generate_teams_menu(stored_players):
         else:
             print("Invalid choice. Please try again.")
 
-def generate_from_stored(stored_players):
+def generate_from_stored():
+    stored_players = load_players()
     if not stored_players:
         print("No stored players available. Please add players first.")
         return
@@ -164,8 +164,10 @@ def generate_from_input():
 
 # Manage Players
 
-def manage_players_menu(stored_players):
+def manage_players_menu():
     while True:
+        stored_players = load_players()
+
         print("\n--- Manage Players Menu ---")
         print("1 - Add to stored players")
         print("2 - Remove from stored players")
