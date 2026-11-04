@@ -48,12 +48,36 @@ def load_players():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
-
 def save_players(players):
     temp_file = f"{PLAYERS_FILE}.tmp"
     with open(temp_file, "w", encoding="utf-8") as file:
         json.dump(players, file, indent=2, ensure_ascii=False)
     os.replace(temp_file, PLAYERS_FILE)
+
+def parse_player_indices(selection_input, max_len):
+    """
+    Parses comma-separated indices and ranges (e.g. '1, 3, 5-7') into a sorted list of 0-based unique indices.
+    Raises ValueError with a descriptive message on invalid format or out-of-range indices.
+    """
+    selected_indices = set()
+    ranges = selection_input.split(",")
+    for range_str in ranges:
+        cleaned = range_str.strip()
+        if not cleaned:
+            continue
+        match = re.fullmatch(r"(\d+)(?:-(\d+))?", cleaned)
+        if not match:
+            raise ValueError(f"Invalid input format in '{cleaned}'")
+
+        start = int(match.group(1)) - 1
+        end = int(match.group(2)) - 1 if match.group(2) else start
+
+        if start < 0 or end < 0 or start >= max_len or end >= max_len or start > end:
+            raise ValueError(f"Index out of range in '{cleaned}'")
+
+        selected_indices.update(range(start, end + 1))
+
+    return sorted(selected_indices)
 
 
 # Generate Teams
@@ -93,29 +117,15 @@ def player_selection(stored_players):
     while True:
         selection_input = input("Enter the numbers of the players you want to include (e.g., '1, 3, 5-7'), or press Enter to select all: ")
 
-        if not selection_input.strip():  # If input is empty, select all players
+        if not selection_input.strip():
             return stored_players
 
-        selected_indices = set() # Using a set to prevent duplicates
         try:
-            ranges = selection_input.split(',')
-            for range_str in ranges:
-                # Check for a single number or a range (e.g., '1' or '1-3')
-                match = re.fullmatch(r"(\d+)(?:-(\d+))?", range_str.strip())
-                if not match:
-                    raise ValueError(f"Invalid input format in '{range_str}'")
-
-                start = int(match.group(1)) - 1  # Convert to 0-indexed
-                end = int(match.group(2)) - 1 if match.group(2) else start
-
-                if start < 0 or end < 0 or start >= len(stored_players) or end >= len(stored_players) or start > end:
-                    raise ValueError(f"Index out of range in '{range_str}'")
-
-                # Add every index in that range to the set
-                selected_indices.update(range(start, end + 1))
-
-            return [stored_players[i] for i in sorted(selected_indices)]
-
+            indices = parse_player_indices(selection_input, len(stored_players))
+            if not indices:
+                print("No players selected. Please try again.")
+                continue
+            return [stored_players[i] for i in indices]
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
 
@@ -161,7 +171,6 @@ def generate_from_input():
             break
 
 
-
 # Manage Players
 
 def manage_players_menu():
@@ -173,6 +182,7 @@ def manage_players_menu():
         print("2 - Remove from stored players")
         print("3 - List stored players")
         print("4 - Edit player rating")
+        print("5 - Rename player")
         print("0 - Back to Main Menu")
 
         choice = input("Select an option: ")
@@ -185,6 +195,8 @@ def manage_players_menu():
             list_stored_players(stored_players)
         elif choice == "4":
             edit_player_rating(stored_players)
+        elif choice == "5":
+            rename_player(stored_players)
         elif choice == "0":
             return
         else:
@@ -218,37 +230,55 @@ def remove_player(stored_players):
     if not stored_players:
         print("No players to remove.")
         return
-    player_name = input("Enter the player name to remove (type '0' to cancel): ")
-    if player_name == "0":
-        return
-    player = next((p for p in stored_players if p["name"] == player_name), None)
-    if player:
-        stored_players.remove(player)
-        save_players(stored_players)
-        print(f"{player_name} removed from stored players.")
-    else:
-        print(f"{player_name} not found in stored players.")
+
+    list_stored_players(stored_players)
+
+    while True:
+        selection_input = input("Enter the numbers of the players to remove (e.g., '1, 3, 5-7', 0 to cancel): ").strip()
+        if selection_input == "0":
+            return
+
+        if not selection_input:
+            print("No players selected. Please enter at least one number or 0 to cancel.")
+            continue
+
+        try:
+            indices = parse_player_indices(selection_input, len(stored_players))
+            if not indices:
+                print("No players selected. Please try again.")
+                continue
+
+            names_to_remove = [stored_players[i]["name"] for i in indices]
+            print(f"Selected for removal: {', '.join(names_to_remove)}")
+
+            if not validate_yes_no(f"Are you sure you want to remove these {len(names_to_remove)} player(s)? (y/n): "):
+                print("Removal cancelled.")
+                return
+
+            # Keep players whose index is NOT in the selected indices
+            index_set = set(indices)
+            remaining_players = [p for i, p in enumerate(stored_players) if i not in index_set]
+
+            save_players(remaining_players)
+            print(f"Successfully removed {len(names_to_remove)} player(s).")
+            return
+
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
 
 def edit_player_rating(stored_players):
-    if not stored_players:
-        print("No players to edit.")
+    index = select_single_player(stored_players, action_prompt="edit rating")
+    if index is None:
         return
 
-    player_name = input("Enter the player name to edit (type '0' to cancel): ")
-    if player_name == "0":
-        return
-
-    player = next(
-        (p for p in stored_players if p["name"].casefold() == player_name.casefold()),
-        None,
-    )
-    if not player:
-        print(f"{player_name} not found in stored players.")
-        return
+    player = stored_players[index]
+    print(f"Editing rating for '{player['name']}' (Current: {player['rating']}).")
 
     while True:
         try:
-            rating = float(input(f"Enter a new rating for {player['name']} (1.0-10.0): "))
+            rating = float(input(f"Enter new rating for {player['name']} (1.0-10.0, 0 to cancel): "))
+            if rating == 0:
+                return
             if math.isfinite(rating) and 1 <= rating <= 10:
                 player["rating"] = round(rating, DECIMALS)
                 break
@@ -258,7 +288,32 @@ def edit_player_rating(stored_players):
 
     stored_players.sort(key=lambda x: x["rating"], reverse=True)
     save_players(stored_players)
-    print(f"{player['name']} rating updated to {player['rating']}.")
+    print(f"'{player['name']}' rating updated to {player['rating']}.")
+
+def rename_player(stored_players):
+    index = select_single_player(stored_players, action_prompt="rename")
+    if index is None:
+        return
+
+    player = stored_players[index]
+    old_name = player["name"]
+
+    while True:
+        new_name = input(f"Enter new name for '{old_name}' (0 to cancel): ").strip()
+        if new_name == "0":
+            return
+        if not new_name:
+            print("Player name cannot be empty.")
+            continue
+        if any(p["name"].casefold() == new_name.casefold() and p is not player for p in stored_players):
+            print(f"A player named '{new_name}' already exists.")
+            continue
+
+        player["name"] = new_name
+        break
+
+    save_players(stored_players)
+    print(f"Renamed '{old_name}' to '{new_name}'.")
 
 def list_stored_players(stored_players):
     if not stored_players:
@@ -269,6 +324,25 @@ def list_stored_players(stored_players):
         for i, player in enumerate(stored_players, start=1):
             print(f"{i:>{max_width}}. {player['name']} (Rating: {player['rating']})")
 
+def select_single_player(stored_players, action_prompt="select"):
+    if not stored_players:
+        print("No players available.")
+        return None
+
+    list_stored_players(stored_players)
+
+    while True:
+        choice = input(f"Enter the player number to {action_prompt} (0 to cancel): ").strip()
+        if choice == "0":
+            return None
+
+        try:
+            index = int(choice) - 1
+            if 0 <= index < len(stored_players):
+                return index
+            print("Number out of range. Please choose a valid player number.")
+        except ValueError:
+            print("Please enter a valid number.")
 
 
 # Manage Teams
@@ -485,7 +559,6 @@ def validate_yes_no(prompt):
         elif response == "n":
             return False
         print("Please enter 'y' or 'n'.")
-
 
 
 # Start program

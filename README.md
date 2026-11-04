@@ -32,18 +32,18 @@ python team_generator.py
 ## **Usage**
 Upon running, the program will display the Main Menu, providing the following options:
 
---- Team Generator Main Menu ---
-1 - Generate Teams Menu
-2 - Manage Players Menu
-3 - Manage Teams Menu
+--- Team Generator Main Menu ---\
+1 - Generate Teams Menu\
+2 - Manage Players Menu\
+3 - Manage Teams Menu\
 0 - Exit program
 
 ### **Generate Teams Menu**
 Choosing option 1 in the Main Menu will display the following:
 
---- Generate Teams Menu ---
-1 - Generate teams from stored players
-2 - Generate teams from input players
+--- Generate Teams Menu ---\
+1 - Generate teams from stored players\
+2 - Generate teams from input players\
 0 - Back to Main Menu
 
 #### Option description
@@ -55,25 +55,27 @@ After teams are generated, you can copy the lineup to the clipboard and/or expor
 ### **Manage Players Menu**
 Choosing option 2 in the Main Menu will display the following:
 
---- Manage Players Menu ---
-1 - Add to stored players
-2 - Remove from stored players
-3 - List stored players
-4 - Edit player rating
+--- Manage Players Menu ---\
+1 - Add to stored players\
+2 - Remove from stored players\
+3 - List stored players\
+4 - Edit player rating\
+5 - Rename player\
 0 - Back to Main Menu
 
 #### Option description
-1. Add to stored players: Add new players with ratings (1.0-10.0) to the stored player list, ensuring no duplicate entries.
-2. Remove from stored players: Remove specific players from storage.
-3. List stored players: Displays the list of stored players and their ratings.
-4. Edit player rating: Find a stored player by name and update their rating while keeping the roster sorted.
+1. Add to stored players: Add new players with ratings (1.0-10.0) to storage, ensuring unique names.
+2. Remove from stored players: Remove single players or batches of players using index and range syntax (e.g., `1, 3, 5-7`).
+3. List stored players: Displays stored players sorted by rating.
+4. Edit player rating: Select a player by index from the list to update their rating.
+5. Rename player: Select a player by index from the list to edit their name.
 
 ### **Manage Teams Menu**
 Choosing option 3 in the Main Menu will display the following:
 
---- Manage Teams Menu ---
-1 - View stored teams
-2 - Remove stored team
+--- Manage Teams Menu ---\
+1 - View stored teams\
+2 - Remove stored team\
 0 - Back to Main Menu
 
 #### Option description
